@@ -15,6 +15,10 @@ build/
 .env.local
 .env.*.local
 
+# Firebase service account (never commit)
+backend/firebase-service-account.json
+backend/*-firebase-adminsdk-*.json
+
 # Logs & cache
 *.log
 npm-debug.log*
