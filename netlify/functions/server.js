@@ -7,13 +7,13 @@ import { join, dirname } from 'path';
 import { pathToFileURL } from 'url';
 import { fileURLToPath } from 'url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const _fnDir = dirname(fileURLToPath(import.meta.url));
 
 let wrapped = null;
 
 async function getApp() {
   if (wrapped) return wrapped;
-  const backendPath = join(__dirname, '..', '..', 'backend', 'server.js');
+  const backendPath = join(_fnDir, '..', '..', 'backend', 'server.js');
   const { app } = await import(pathToFileURL(backendPath).href);
   wrapped = serverless(app);
   return wrapped;

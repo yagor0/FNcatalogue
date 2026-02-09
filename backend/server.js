@@ -12,8 +12,8 @@ import { initFirebase } from './firebase.js';
 import * as fs from './firestore.js';
 import { runSeed } from './initDb.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const _serverPath = fileURLToPath(import.meta.url);
+const _serverDir = dirname(_serverPath);
 
 const app = express();
 const PORT = 3001;
@@ -24,7 +24,7 @@ let upload;
 if (isNetlify) {
   upload = multer({ storage: multer.memoryStorage() });
 } else {
-  const uploadDir = join(__dirname, '..', 'frontend', 'public', 'uploads');
+  const uploadDir = join(_serverDir, '..', 'frontend', 'public', 'uploads');
   if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
   upload = multer({
     storage: multer.diskStorage({

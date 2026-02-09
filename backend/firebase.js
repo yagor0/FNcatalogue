@@ -7,7 +7,7 @@ import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const _firebaseDir = dirname(fileURLToPath(import.meta.url));
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'fncatalogue';
 const USE_EMULATOR = !!process.env.FIRESTORE_EMULATOR_HOST;
@@ -21,7 +21,7 @@ function getServiceAccountPath() {
     'fncatalogue-firebase-adminsdk-fbsvc-f83dce6006.json',
   ];
   for (const name of names) {
-    const p = join(__dirname, name);
+    const p = join(_firebaseDir, name);
     if (existsSync(p)) return p;
   }
   return null;
