@@ -1,22 +1,31 @@
 /**
  * Netlify Function: wraps Express API for FNcatalogue
- * بارگذاری بک‌اند با مسیر نسبی به فایل تابع (هم cwd هم __dirname)
+ * روی Netlify از process.cwd() استفاده می‌کنیم (import.meta.url ممکن است undefined باشد)
  */
 import serverless from 'serverless-http';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import { pathToFileURL } from 'url';
-import { fileURLToPath } from 'url';
-
-const _fnDir = dirname(fileURLToPath(import.meta.url));
 
 let wrapped = null;
 
 async function getApp() {
   if (wrapped) return wrapped;
-  const backendPath = join(_fnDir, '..', '..', 'backend', 'server.js');
-  const { app } = await import(pathToFileURL(backendPath).href);
-  wrapped = serverless(app);
-  return wrapped;
+  const cwd = process.cwd();
+  const paths = [
+    join(cwd, 'backend', 'server.js'),
+    join(cwd, 'netlify', 'functions', '..', '..', 'backend', 'server.js'),
+  ];
+  let lastErr;
+  for (const p of paths) {
+    try {
+      const { app } = await import(pathToFileURL(p).href);
+      wrapped = serverless(app);
+      return wrapped;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw new Error('Backend load failed: ' + (lastErr?.message || lastErr));
 }
 
 export const handler = async (event, context) => {
