@@ -1,0 +1,13 @@
+---
+description: در این پروژه هنگام commit از trailer و Co-authored-by استفاده نکن.
+alwaysApply: true
+---
+
+# Git commit در این پروژه
+
+- هنگام اجرای دستورات git در این پروژه **هرگز** از `--trailer "Co-authored-by: ..."` استفاده نکن.
+- فقط از این فرم ساده استفاده کن:
+  - `git add .`
+  - `git commit -m "پیام کامیت"`
+  - `git push origin main`
+- نام و ایمیل commit باید مال صاحب پروژه باشد (مثلاً user.name و user.email که کاربر تنظیم کرده)، نه Cursor یا عامل دیگر.
