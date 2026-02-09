@@ -19,3 +19,24 @@
   to = "/.netlify/functions/server"
   status = 200
 
+# SPA: مسیرهای اپ → index.html (تا رفرش و لینک مستقیم کار کند)
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/wishlist"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/history"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/product/*"
+  to = "/index.html"
+  status = 200
