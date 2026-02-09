@@ -11,17 +11,23 @@ import { runSeed } from './seed.js';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-/** آپلود تصویر به Firebase Storage و برگرداندن URL عمومی */
+/** آپلود تصویر به Firebase Storage و برگرداندن URL عمومی؛ در صورت خطا null و لاگ خطا */
 async function uploadProductImageToStorage(file) {
   if (!file || !file.buffer) return null;
-  const bucket = await getStorageBucket();
-  const ext = (file.originalname && file.originalname.split('.').pop()) || 'jpg';
-  const name = `products/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
-  const bucketFile = bucket.file(name);
-  await bucketFile.save(file.buffer, {
-    metadata: { contentType: file.mimetype || 'image/jpeg' },
-  });
-  return `https://storage.googleapis.com/${bucket.name}/${name}`;
+  try {
+    const bucket = await getStorageBucket();
+    const ext = (file.originalname && file.originalname.split('.').pop()) || 'jpg';
+    const safeExt = /^[a-z0-9]+$/i.test(ext) ? ext : 'jpg';
+    const name = `products/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${safeExt}`;
+    const bucketFile = bucket.file(name);
+    await bucketFile.save(file.buffer, {
+      metadata: { contentType: file.mimetype || 'image/jpeg' },
+    });
+    return `https://storage.googleapis.com/${bucket.name}/${name}`;
+  } catch (e) {
+    console.error('Storage upload error:', e);
+    return null;
+  }
 }
 const app = express();
 
@@ -221,9 +227,11 @@ app.put('/api/admin/products/:id', requireAdmin, upload.single('image'), async (
     const current = await fs.getProductById(id);
     if (!current) return res.status(404).json({ error: 'Product not found' });
     let image = body.image !== undefined ? body.image : current.image;
+    let imageUploadFailed = false;
     if (req.file && req.file.buffer) {
       const url = await uploadProductImageToStorage(req.file);
       if (url) image = url;
+      else imageUploadFailed = true;
     }
     let attributes = body.attributes;
     if (typeof attributes === 'string') try { attributes = JSON.parse(attributes); } catch (_) { attributes = current.attributes; }
@@ -238,10 +246,15 @@ app.put('/api/admin/products/:id', requireAdmin, upload.single('image'), async (
       attributes: typeof attributes === 'object' ? attributes : (attributes || current.attributes),
     };
     const row = await fs.adminUpdateProduct(id, data);
+    if (imageUploadFailed) row.imageUploadFailed = true;
     res.json(row);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'خطا در بروزرسانی', message: safeErrMessage(err) });
+    console.error('PUT product error:', err);
+    res.status(500).json({
+      error: 'خطا در بروزرسانی',
+      message: safeErrMessage(err),
+      detail: err.code || err.message,
+    });
   }
 });
 
