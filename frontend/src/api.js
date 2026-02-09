@@ -126,6 +126,19 @@ export async function adminGetCategories() {
   return res.json();
 }
 
+/** تنظیم CORS باکت Storage (یک بار بعد از deploy اگر آپلود عکس خطای CORS می‌دهد) */
+export async function adminSetStorageCors() {
+  const res = await fetch(API + '/admin/set-storage-cors', {
+    method: 'POST',
+    headers: adminHeaders(),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || data.error || 'خطا در تنظیم CORS');
+  }
+  return res.json();
+}
+
 /** لینک آپلود مستقیم به Firebase Storage — فایل از مرورگر مستقیم آپلود می‌شود، بدون عبور از سرور */
 export async function adminGetUploadUrl(filename, contentType = 'image/jpeg') {
   const res = await fetch(API + '/admin/upload-url', {

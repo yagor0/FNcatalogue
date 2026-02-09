@@ -67,9 +67,11 @@ https://fn-catalogue.netlify.app/api/admin/seed?secret=fn123
 | `VITE_FIREBASE_API_KEY` | apiKey از Firebase Console |
 | `VITE_FIREBASE_AUTH_DOMAIN` | مثلاً `fncatalogue.firebaseapp.com` |
 | `VITE_FIREBASE_PROJECT_ID` | مثلاً `fncatalogue` |
-| `VITE_FIREBASE_STORAGE_BUCKET` | مثلاً `fncatalogue.appspot.com` |
+| `VITE_FIREBASE_STORAGE_BUCKET` | مثلاً `fncatalogue.appspot.com` یا `fncatalogue.firebasestorage.app` |
 
-با این روش نیازی به تنظیم CORS باکت با gsutil نیست.
+**CORS برای آپلود:** اگر باکت شما `fncatalogue.firebasestorage.app` است، در Netlify متغیر **`FIREBASE_STORAGE_BUCKET`** را روی همین مقدار تنظیم کنید (برای توابع سرور). بعد از deploy، در پنل مدیریت (داشبورد) دکمهٔ **«تنظیم CORS آپلود»** را یک بار بزنید تا CORS باکت از طریق API تنظیم شود. اگر خطای دسترسی داد، از روش دستی با [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) استفاده کنید:  
+`gcloud auth application-default login` و سپس  
+`gsutil cors set storage-cors.json gs://fncatalogue.firebasestorage.app`
 
 ---
 

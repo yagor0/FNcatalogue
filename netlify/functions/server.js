@@ -5,7 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import serverless from 'serverless-http';
-import { initFirebase, getStorageBucket } from './firebase.js';
+import { initFirebase, getStorageBucket, setStorageBucketCors } from './firebase.js';
 import * as fs from './firestore.js';
 import { runSeed } from './seed.js';
 
@@ -179,6 +179,29 @@ const requireAdmin = (req, res, next) => {
   if (!auth.startsWith('Bearer admin-')) return res.status(401).json({ error: 'Unauthorized' });
   next();
 };
+
+/** تنظیم CORS روی باکت Storage — یک بار بعد از deploy صدا بزنید تا آپلود از مرورگر کار کند */
+const STORAGE_CORS = [
+  {
+    origin: [
+      'https://fn-catalogue.netlify.app',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ],
+    method: ['GET', 'POST', 'PUT', 'HEAD', 'OPTIONS'],
+    responseHeader: ['Content-Type', 'Content-Length', 'Content-Range', 'Authorization'],
+    maxAgeSeconds: 3600,
+  },
+];
+app.post('/api/admin/set-storage-cors', requireAdmin, async (req, res) => {
+  try {
+    await setStorageBucketCors(STORAGE_CORS);
+    res.json({ ok: true, message: 'CORS باکت Storage تنظیم شد. حالا آپلود تصویر را تست کنید.' });
+  } catch (err) {
+    console.error('set-storage-cors error:', err);
+    res.status(500).json({ error: 'خطا در تنظیم CORS', message: safeErrMessage(err) });
+  }
+});
 
 /** لینک آپلود مستقیم به Storage (بدون عبور فایل از تابع) — جلوگیری از timeout و ERR_CONNECTION_CLOSED */
 app.post('/api/admin/upload-url', requireAdmin, express.json(), async (req, res) => {

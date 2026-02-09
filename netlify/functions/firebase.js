@@ -10,6 +10,7 @@ async function loadAdmin() {
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'fncatalogue';
 const USE_EMULATOR = !!process.env.FIRESTORE_EMULATOR_HOST;
+const STORAGE_BUCKET = process.env.FIREBASE_STORAGE_BUCKET || PROJECT_ID + '.appspot.com';
 
 function getCert() {
   if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
@@ -38,13 +39,13 @@ export async function initFirebase() {
   if (a.apps.length) return a.app();
 
   if (USE_EMULATOR) {
-    a.initializeApp({ projectId: PROJECT_ID, storageBucket: PROJECT_ID + '.appspot.com' });
+    a.initializeApp({ projectId: PROJECT_ID, storageBucket: STORAGE_BUCKET });
   } else {
     const cert = getCert();
     if (!cert) throw new Error('در Netlify FIREBASE_SERVICE_ACCOUNT_JSON یا سه متغیر Firebase را تنظیم کنید.');
     a.initializeApp({
       credential: a.credential.cert(cert),
-      storageBucket: (cert.projectId || PROJECT_ID) + '.appspot.com',
+      storageBucket: STORAGE_BUCKET,
     });
   }
   return a.app();
@@ -59,5 +60,12 @@ export async function getFirestore() {
 export async function getStorageBucket() {
   const a = await loadAdmin();
   if (!a.apps.length) await initFirebase();
-  return a.storage().bucket();
+  return a.storage().bucket(STORAGE_BUCKET);
+}
+
+/** تنظیم CORS روی باکت Storage از طریق API (یک بار بعد از deploy) */
+export async function setStorageBucketCors(corsConfig) {
+  const bucket = await getStorageBucket();
+  await bucket.setMetadata({ cors: corsConfig });
+  return true;
 }

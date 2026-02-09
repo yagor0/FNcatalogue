@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { adminGetProducts, adminGetCategories, adminCreateProduct, adminUpdateProduct, adminDeleteProduct } from '../api';
+import { adminGetProducts, adminGetCategories, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, adminSetStorageCors } from '../api';
 import { uploadProductImage } from '../firebase';
 
 export default function AdminDashboard() {
@@ -12,6 +12,7 @@ export default function AdminDashboard() {
   const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', category_id: '', brand: '', image: '', attributes: '{}' });
   const [error, setError] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [corsLoading, setCorsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -110,6 +111,20 @@ export default function AdminDashboard() {
     navigate('/admin');
   };
 
+  const handleSetStorageCors = async () => {
+    setError('');
+    setCorsLoading(true);
+    try {
+      const data = await adminSetStorageCors();
+      setError('');
+      alert(data.message || 'CORS تنظیم شد.');
+    } catch (err) {
+      setError(err.message || 'خطا در تنظیم CORS');
+    } finally {
+      setCorsLoading(false);
+    }
+  };
+
   if (loading) return <p className="empty-state">در حال بارگذاری...</p>;
 
   return (
@@ -121,6 +136,9 @@ export default function AdminDashboard() {
       <div className="admin-layout">
         <aside className="admin-sidebar">
           <NavLink to="/admin/dashboard" end className="active">محصولات</NavLink>
+          <button type="button" className="btn btn-ghost" style={{ width: '100%', textAlign: 'right', marginTop: '0.5rem' }} onClick={handleSetStorageCors} disabled={corsLoading} title="اگر آپلود عکس خطای CORS می‌دهد، یک بار بزنید">
+            {corsLoading ? '…' : 'تنظیم CORS آپلود'}
+          </button>
           <NavLink to="/">بازگشت به فروشگاه</NavLink>
         </aside>
         <div className="admin-content">
