@@ -11,10 +11,17 @@
 
 2. **متغیرهای محیطی** (Site configuration → Environment variables):
 
+   **روش الف — سه متغیر جدا (پیشنهادی برای Netlify):**
+
    | Key | Value |
    |-----|--------|
-   | `FIREBASE_SERVICE_ACCOUNT_JSON` | کل محتوای فایل JSON کلید سرویس Firebase (از Console → Project settings → Service accounts → Generate new private key). فقط از `{` تا `}` را کپی کنید. |
+   | `FIREBASE_PROJECT_ID` | شناسهٔ پروژه (مثلاً `fncatalogue`) |
+   | `FIREBASE_CLIENT_EMAIL` | مقدار `client_email` از فایل کلید سرویس |
+   | `FIREBASE_PRIVATE_KEY` | مقدار `private_key` از فایل کلید سرویس (با خطوط واقعی یا `\n`) |
    | `SEED_SECRET` | یک رمز مخفی برای seed یک‌بار (مثلاً `fn123`) |
+
+   **روش ب — یک JSON:**  
+   به‌جای سه متغیر بالا می‌توانید فقط `FIREBASE_SERVICE_ACCOUNT_JSON` را با کل محتوای فایل JSON کلید سرویس پر کنید.
 
 3. **Deploy**  
    Netlify با `netlify.toml` خودش فرانت را بیلد و API را به‌صورت تابع اجرا می‌کند.
