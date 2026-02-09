@@ -12,7 +12,7 @@ import { initFirebase } from './firebase.js';
 import * as fs from './firestore.js';
 import { runSeed } from './initDb.js';
 
-const _serverPath = fileURLToPath(import.meta.url);
+const _serverPath = typeof import.meta?.url === 'string' ? fileURLToPath(import.meta.url) : join(process.cwd() || '/var/task', 'backend', 'server.js');
 const _serverDir = dirname(_serverPath);
 
 const app = express();

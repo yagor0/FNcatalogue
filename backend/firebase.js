@@ -7,7 +7,9 @@ import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-const _firebaseDir = dirname(fileURLToPath(import.meta.url));
+const _firebaseDir = typeof import.meta?.url === 'string'
+  ? dirname(fileURLToPath(import.meta.url))
+  : join(process.cwd() || '/var/task', 'backend');
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'fncatalogue';
 const USE_EMULATOR = !!process.env.FIRESTORE_EMULATOR_HOST;

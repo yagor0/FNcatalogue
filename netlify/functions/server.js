@@ -10,11 +10,11 @@ let wrapped = null;
 
 async function getApp() {
   if (wrapped) return wrapped;
-  const cwd = process.cwd();
+  const base = (typeof process.cwd === 'function' ? process.cwd() : null) || '/var/task';
   const paths = [
-    join(cwd, 'backend', 'server.js'),
-    join(cwd, 'netlify', 'functions', '..', '..', 'backend', 'server.js'),
-  ];
+    join(base, 'backend', 'server.js'),
+    join(base, 'netlify', 'functions', '..', '..', 'backend', 'server.js'),
+  ].filter((p) => typeof p === 'string' && p.length > 0);
   let lastErr;
   for (const p of paths) {
     try {
