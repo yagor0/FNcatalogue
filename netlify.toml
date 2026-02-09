@@ -12,9 +12,10 @@
   [functions.server]
     timeout = 26
 
-# Redirect API calls to the serverless function (keep path for Express)
+# API → تابع سرور
 [[redirects]]
   force = true
   from = "/api/*"
   to = "/.netlify/functions/server"
   status = 200
+

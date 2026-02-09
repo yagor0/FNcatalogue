@@ -1,153 +1,60 @@
-# کاتالوگ الکترونیک فروشگاه آنلاین
+# کاتالوگ الکترونیک — FNcatalogue
 
-پروژه درس فن‌آوری (تجارت الکترونیک) — پیاده‌سازی تحت وب.
-
-## نیازمندی‌ها
-
-- Node.js 18+
-- npm
-- **یکی از دو حالت:**
-  - **امولاتور (بدون پروژه واقعی):** نصب [Firebase CLI](https://firebase.google.com/docs/cli)
-  - **Firebase واقعی:** پروژه FNcatalogue و فایل کلید سرویس (Service Account JSON)
-
-## نصب و اجرا
-
-### حالت الف: اجرا با Firestore Emulator (بدون پروژه Firebase)
-
-برای توسعهٔ محلی بدون اتصال به Firebase واقعی:
-
-1. نصب Firebase CLI (یک بار):
-   ```bash
-   npm install -g firebase-tools
-   ```
-
-2. در **ترمینال اول** امولاتور Firestore را اجرا کنید (از ریشهٔ پروژه):
-   ```bash
-   firebase emulators:start --only firestore
-   ```
-   (پورت پیش‌فرض Firestore: `8080`)
-
-3. در **ترمینال دوم** متغیر محیطی را تنظیم و بک‌اند را اجرا کنید:
-   - **Windows (PowerShell):**
-     ```powershell
-     cd backend
-     npm install
-     $env:FIRESTORE_EMULATOR_HOST="localhost:8080"
-     npm run init-db
-     npm start
-     ```
-   - **Windows (CMD) یا لینوکس/مک:**
-     ```bash
-     cd backend
-     npm install
-     set FIRESTORE_EMULATOR_HOST=localhost:8080   # فقط CMD
-     npm run init-db
-     npm start
-     ```
-     در لینوکس/مک به‌جای `set` از `export FIRESTORE_EMULATOR_HOST=localhost:8080` استفاده کنید.
-
-بک‌اند به امولاتور متصل می‌شود و نیازی به فایل کلید Firebase نیست.
-
-### حالت ب: اجرا با پروژهٔ واقعی Firebase (FNcatalogue)
-
-1. فایل کلید Firebase را در پوشهٔ `backend/` قرار دهید:
-   - نام فایل: `firebase-service-account.json` یا `fncatalogue-firebase-adminsdk-fbsvc-f83dce6006.json`
-   - یا مسیر فایل را در متغیر محیطی بگذارید: `GOOGLE_APPLICATION_CREDENTIALS=مسیر/به/filename.json`
-
-2. نصب و مقداردهی و اجرا:
-   ```bash
-   cd backend
-   npm install
-   npm run init-db
-   npm start
-   ```
-
-سرور API روی `http://localhost:3001` اجرا می‌شود.
-
-### ۲. Frontend (رابط کاربری)
-
-در یک ترمینال دیگر:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
- برنامه تحت وب روی `http://localhost:5173` باز می‌شود.
-
-### ورود به پنل مدیریت
-
-- آدرس: **مدیریت** در منو → ورود
-- نام کاربری: `admin`
-- رمز عبور: `admin123`
+فرانت روی **Netlify**، دیتابیس **Firebase Firestore** (پروژه FNcatalogue).
 
 ---
 
-## استقرار روی Netlify (با دیتابیس Firebase FNcatalogue)
+## استقرار روی Netlify
 
-پروژه برای اجرا روی Netlify و اتصال به **Firestore** پروژهٔ **FNcatalogue** آماده است.
+1. **اتصال ریپو**  
+   سایت را به Netlify وصل کنید (GitHub/GitLab یا آپلود).
 
-### ۱. تنظیمات در Netlify
+2. **متغیرهای محیطی** (Site configuration → Environment variables):
 
-1. ریپو را به Netlify وصل کنید (از گیت یا آپلود).
-2. در **Site configuration → Environment variables** این متغیر را اضافه کنید:
-   - **Key:** `FIREBASE_SERVICE_ACCOUNT_JSON`
-   - **Value:** محتوای **کل** فایل JSON کلید سرویس (Service Account Key) را کپی کنید (از Firebase Console → Project settings → Service accounts → Generate new private key). مقدار باید یک رشتهٔ JSON معتبر باشد (از `{` تا `}`).
+   | Key | Value |
+   |-----|--------|
+   | `FIREBASE_SERVICE_ACCOUNT_JSON` | کل محتوای فایل JSON کلید سرویس Firebase (از Console → Project settings → Service accounts → Generate new private key). فقط از `{` تا `}` را کپی کنید. |
+   | `SEED_SECRET` | یک رمز مخفی برای seed یک‌بار (مثلاً `fn123`) |
 
-3. Build را ذخیره کنید. Netlify با دستور و مسیر تعریف‌شده در `netlify.toml` فرانت را بیلد و تابع سرور را برای API اجرا می‌کند.
+3. **Deploy**  
+   Netlify با `netlify.toml` خودش فرانت را بیلد و API را به‌صورت تابع اجرا می‌کند.
 
-### ۲. قوانین Firestore
+---
 
-قوانین فعلی شما (`allow read, write: if false`) فقط برای **دسترسی از سمت کلاینت (SDK وب/موبایل)** اعمال می‌شوند.  
-**Backend این پروژه از Firebase Admin SDK استفاده می‌کند و از این قوانین عبور می‌کند**؛ بنابراین API روی Netlify بدون تغییر قوانین کار می‌کند. اگر بخواهید فقط سرور به Firestore دسترسی داشته باشد، همین قوانین مناسب است.
+## دادهٔ اولیه (Seed) — یک بار
 
-### ۳. دادهٔ اولیه (Seed) — حتماً یک بار انجام شود
+بعد از اولین deploy، یک بار این آدرس را باز کنید (با همان مقدار `SEED_SECRET`):
 
-اگر داخل Firebase چیزی ساخته نشده و با `admin` / `admin123` وارد نمی‌شوید، باید یک بار دیتابیس را seed کنید.
-
-**روش الف — از طریق Netlify (پیشنهادی):**
-
-1. در Netlify → **Site configuration → Environment variables** یک متغیر اضافه کنید:
-   - **Key:** `SEED_SECRET`
-   - **Value:** یک رشتهٔ تصادفی و مخفی (مثلاً `mySecretSeed123`)
-2. سایت را دوباره Deploy کنید تا این متغیر اعمال شود.
-3. یک بار این آدرس را با مرورگر یا Postman باز کنید (روش GET ساده است) یا با PowerShell:
-   ```powershell
-   Invoke-WebRequest -Uri "https://آدرس-سایت-شما.netlify.app/api/admin/seed?secret=mySecretSeed123" -Method POST
-   ```
-   به‌جای `آدرس-سایت-شما` و `mySecretSeed123` آدرس واقعی سایت و همان مقدار `SEED_SECRET` را بگذارید.
-4. اگر پاسخ `{"ok":true,...}` بود، دسته‌ها، محصولات و کاربر ادمین (`admin` / `admin123`) ساخته شده‌اند. بعد از آن می‌توانید از منوی **مدیریت** وارد شوید.
-5. (اختیاری) برای امنیت بیشتر بعد از seed می‌توانید متغیر `SEED_SECRET` را از Netlify حذف کنید.
-
-**روش ب — اجرای محلی:**
-
-```bash
-cd backend
-# فایل کلید را در backend بگذارید یا FIREBASE_SERVICE_ACCOUNT_JSON را ست کنید
-npm run init-db
+```
+https://آدرس-سایت-شما.netlify.app/api/admin/seed?secret=fn123
 ```
 
-### ۴. آپلود تصویر روی Netlify
+در صورت موفقیت، دسته‌ها، محصولات و کاربر ادمین ساخته می‌شوند.
 
-در محیط Netlify، آپلود فایل تصویر به‌صورت موقت در حافظه پردازش می‌شود و روی دیسک ذخیره نمی‌شود. برای افزودن/ویرایش محصول در پنل ادمین، از فیلد **URL تصویر** استفاده کنید یا تصویر را در جای دیگری (مثلاً Firebase Storage یا CDN) آپلود کنید و لینک را بگذارید.
+---
+
+## ورود به پنل مدیریت
+
+- از منو **مدیریت** → ورود با **admin** / **admin123**
 
 ---
 
 ## ساختار پروژه
 
-- `backend/` — سرور Express + Firebase Firestore، API محصولات، دسته‌بندی، علاقه‌مندی، تاریخچه، پنل ادمین
-- `frontend/` — اپلیکیشن React (Vite)، صفحات کاتالوگ، جزئیات محصول، جستجو و فیلتر، لیست علاقه‌مندی، تاریخچه، پیشنهادها
-- `گزارش_پروژه.pdf` یا `REPORT.md` — گزارش پروژه (معماری، ابزارها، قابلیت‌ها، اسکرین‌شات)
+- **frontend/** — React (Vite). خروجی بیلد در `frontend/dist` روی Netlify سرو می‌شود.
+- **backend/** — Express API با Firebase Firestore. روی Netlify به‌صورت تابع در `netlify/functions/server.js` اجرا می‌شود.
+- **netlify.toml** — تنظیمات بیلد، پوشهٔ publish، و redirect درخواست‌های `/api/*` به تابع. با ساخت `404.html` در بیلد، رفرش روی مسیرهایی مثل `/wishlist` و `/product/123` درست کار می‌کند.
 
-## قابلیت‌های پیاده‌سازی شده
+دیتابیس فقط **Firebase Firestore** است؛ SQLite یا فایل دیتابیس دیگری استفاده نمی‌شود.  
+در پنل ادمین روی Netlify برای تصویر محصول از **URL تصویر** استفاده کنید (آپلود فایل روی سرور ذخیره نمی‌شود).
 
-- نمایش محصولات (نام، تصویر، توضیحات، قیمت، دسته، موجودی، ویژگی‌ها)
-- مرتب‌سازی و فیلتر (قیمت، محبوبیت، دسته، برند)
-- مدیریت محصولات برای مدیر (افزودن، ویرایش، حذف، به‌روزرسانی موجودی/قیمت)
-- جستجوی متنی و فیلتر ترکیبی
-- علاقه‌مندی (Wishlist)
-- تاریخچه مشاهده
-- محصولات پیشنهادی
-- دسته‌بندی چندسطحی
-- صفحه جزئیات محصول با نظرات مشتریان
+---
+
+## توسعهٔ محلی (اختیاری)
+
+برای تست روی سیستم خود:
+
+- **فرانت:** `cd frontend && npm i && npm run dev` (پورت ۵۱۷۳؛ برای API از پروکسی Vite به بک‌اند استفاده می‌شود.)
+- **بک‌اند:** فایل کلید سرویس را در `backend/` بگذارید، سپس `cd backend && npm i && npm run init-db && npm start` (پورت ۳۰۰۱).
+
+برای seed از طریق Netlify نیازی به اجرای محلی نیست.

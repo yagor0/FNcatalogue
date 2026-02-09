@@ -19,20 +19,20 @@ const headers = () => ({
 
 export async function getCategories(tree = false) {
   const res = await fetch(API + '/categories' + (tree ? '?tree=1' : ''));
-  if (!res.ok) throw new Error('Failed to fetch categories');
+  if (!res.ok) throw new Error('خطا در بارگذاری دسته‌ها');
   return res.json();
 }
 
 export async function getProducts(params = {}) {
   const u = new URLSearchParams(params);
   const res = await fetch(API + '/products?' + u);
-  if (!res.ok) throw new Error('Failed to fetch products');
+  if (!res.ok) throw new Error('خطا در بارگذاری محصولات');
   return res.json();
 }
 
 export async function getProduct(id) {
   const res = await fetch(API + '/products/' + id);
-  if (!res.ok) throw new Error('Failed to fetch product');
+  if (!res.ok) throw new Error('خطا در بارگذاری محصول');
   return res.json();
 }
 
@@ -46,7 +46,7 @@ export async function recordView(productId) {
 
 export async function getWishlist() {
   const res = await fetch(API + '/wishlist', { headers: headers() });
-  if (!res.ok) throw new Error('Failed to fetch wishlist');
+  if (!res.ok) throw new Error('خطا در بارگذاری لیست علاقه‌مندی');
   return res.json();
 }
 
@@ -68,13 +68,13 @@ export async function removeFromWishlist(productId) {
 
 export async function getHistory() {
   const res = await fetch(API + '/history', { headers: headers() });
-  if (!res.ok) throw new Error('Failed to fetch history');
+  if (!res.ok) throw new Error('خطا در بارگذاری تاریخچه');
   return res.json();
 }
 
 export async function getRecommended(limit = 8) {
   const res = await fetch(API + '/recommended?limit=' + limit);
-  if (!res.ok) throw new Error('Failed to fetch recommended');
+  if (!res.ok) throw new Error('خطا در بارگذاری پیشنهادها');
   return res.json();
 }
 
@@ -105,13 +105,13 @@ function adminHeaders() {
 
 export async function adminGetProducts() {
   const res = await fetch(API + '/admin/products', { headers: adminHeaders() });
-  if (!res.ok) throw new Error('Unauthorized');
+  if (!res.ok) throw new Error('لطفاً دوباره وارد شوید');
   return res.json();
 }
 
 export async function adminGetCategories() {
   const res = await fetch(API + '/admin/categories', { headers: adminHeaders() });
-  if (!res.ok) throw new Error('Unauthorized');
+  if (!res.ok) throw new Error('لطفاً دوباره وارد شوید');
   return res.json();
 }
 
