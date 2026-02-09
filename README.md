@@ -56,8 +56,20 @@ https://fn-catalogue.netlify.app/api/admin/seed?secret=fn123
 
 دیتابیس **Firebase Firestore**؛ تصاویر محصولات در **Firebase Storage** ذخیره می‌شوند.
 
-**تصاویر محصول:** در پنل ادمین می‌توانید عکس آپلود کنید؛ عکس در Firebase Storage (پوشهٔ `products/`) ذخیره و لینک آن در محصول قرار می‌گیرد. در کنسول Firebase باید **Storage** را فعال کرده و قوانین را طوری تنظیم کنید که خواندن عمومی مجاز باشد، مثلاً:
-`allow read: if true; allow write: if request.auth != null;`
+**تصاویر محصول:** آپلود از پنل ادمین با **Firebase SDK** (فرانت) انجام می‌شود؛ عکس در Storage (پوشهٔ `products/`) ذخیره و لینک آن با ذخیرهٔ محصول در Firestore ثبت می‌شود. در کنسول Firebase **Storage** را فعال کنید. چون آپلود از فرانت بدون Firebase Auth انجام می‌شود، برای مسیر `products` باید نوشتن مجاز باشد، مثلاً:
+`match /products/{all} { allow read, write: if true; }`
+(برای محیط واقعی بعداً می‌توانید با Firebase Auth محدود کنید.)
+
+**تنظیم Firebase در فرانت (برای آپلود تصویر):** در Firebase Console → Project settings → Your apps یک اپ وب اضافه کنید و مقادیر را در Netlify به‌صورت متغیر محیطی برای **Build** قرار دهید (با پیشوند `VITE_` تا در فرانت در دسترس باشند):
+
+| Key | Value |
+|-----|--------|
+| `VITE_FIREBASE_API_KEY` | apiKey از Firebase Console |
+| `VITE_FIREBASE_AUTH_DOMAIN` | مثلاً `fncatalogue.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID` | مثلاً `fncatalogue` |
+| `VITE_FIREBASE_STORAGE_BUCKET` | مثلاً `fncatalogue.appspot.com` |
+
+با این روش نیازی به تنظیم CORS باکت با gsutil نیست.
 
 ---
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { adminGetProducts, adminGetCategories, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, adminGetUploadUrl } from '../api';
+import { adminGetProducts, adminGetCategories, adminCreateProduct, adminUpdateProduct, adminDeleteProduct } from '../api';
+import { uploadProductImage } from '../firebase';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -51,21 +52,15 @@ export default function AdminDashboard() {
     });
   };
 
-  /** آپلود مستقیم به Firebase Storage با Signed URL — فایل از مرورگر می‌رود، بدون عبور از Netlify (جلوگیری از timeout) */
+  /** آپلود مستقیم به Firebase Storage با SDK — لینک در فرم قرار می‌گیرد و با ذخیره محصول در Firestore ذخیره می‌شود */
   const handleImageSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setError('');
     setUploadingImage(true);
     try {
-      const { uploadUrl, publicUrl } = await adminGetUploadUrl(file.name, file.type || 'image/jpeg');
-      const putRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type || 'image/jpeg' },
-      });
-      if (!putRes.ok) throw new Error('آپلود عکس ناموفق');
-      setForm((f) => ({ ...f, image: publicUrl, imageFile: null }));
+      const downloadURL = await uploadProductImage(file);
+      setForm((f) => ({ ...f, image: downloadURL }));
     } catch (err) {
       setError(err.message || 'خطا در آپلود تصویر');
     } finally {
