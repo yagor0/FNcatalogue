@@ -35,7 +35,7 @@
 بعد از اولین deploy، یک بار این آدرس را باز کنید (با همان مقدار `SEED_SECRET`):
 
 ```
-https://آدرس-سایت-شما.netlify.app/api/admin/seed?secret=fn123
+https://fn-catalogue.netlify.app/api/admin/seed?secret=fn123
 ```
 
 در صورت موفقیت، دسته‌ها، محصولات و کاربر ادمین ساخته می‌شوند.
