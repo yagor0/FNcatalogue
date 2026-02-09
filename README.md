@@ -102,17 +102,31 @@ npm run dev
 قوانین فعلی شما (`allow read, write: if false`) فقط برای **دسترسی از سمت کلاینت (SDK وب/موبایل)** اعمال می‌شوند.  
 **Backend این پروژه از Firebase Admin SDK استفاده می‌کند و از این قوانین عبور می‌کند**؛ بنابراین API روی Netlify بدون تغییر قوانین کار می‌کند. اگر بخواهید فقط سرور به Firestore دسترسی داشته باشد، همین قوانین مناسب است.
 
-### ۳. دادهٔ اولیه (Seed)
+### ۳. دادهٔ اولیه (Seed) — حتماً یک بار انجام شود
 
-پس از اولین استقرار، یک بار به‌صورت محلی با اتصال به همان پروژهٔ Firebase دستور seed را اجرا کنید:
+اگر داخل Firebase چیزی ساخته نشده و با `admin` / `admin123` وارد نمی‌شوید، باید یک بار دیتابیس را seed کنید.
+
+**روش الف — از طریق Netlify (پیشنهادی):**
+
+1. در Netlify → **Site configuration → Environment variables** یک متغیر اضافه کنید:
+   - **Key:** `SEED_SECRET`
+   - **Value:** یک رشتهٔ تصادفی و مخفی (مثلاً `mySecretSeed123`)
+2. سایت را دوباره Deploy کنید تا این متغیر اعمال شود.
+3. یک بار این آدرس را با مرورگر یا Postman باز کنید (روش GET ساده است) یا با PowerShell:
+   ```powershell
+   Invoke-WebRequest -Uri "https://آدرس-سایت-شما.netlify.app/api/admin/seed?secret=mySecretSeed123" -Method POST
+   ```
+   به‌جای `آدرس-سایت-شما` و `mySecretSeed123` آدرس واقعی سایت و همان مقدار `SEED_SECRET` را بگذارید.
+4. اگر پاسخ `{"ok":true,...}` بود، دسته‌ها، محصولات و کاربر ادمین (`admin` / `admin123`) ساخته شده‌اند. بعد از آن می‌توانید از منوی **مدیریت** وارد شوید.
+5. (اختیاری) برای امنیت بیشتر بعد از seed می‌توانید متغیر `SEED_SECRET` را از Netlify حذف کنید.
+
+**روش ب — اجرای محلی:**
 
 ```bash
 cd backend
-# تنظیم FIREBASE_SERVICE_ACCOUNT_JSON یا استفاده از فایل کلید
+# فایل کلید را در backend بگذارید یا FIREBASE_SERVICE_ACCOUNT_JSON را ست کنید
 npm run init-db
 ```
-
-بعد از آن، ورود ادمین با `admin` / `admin123` ممکن است نیاز به اضافه‌کردن کاربر در Firestore داشته باشد (اسکریپت `init-db` این کار را انجام می‌دهد).
 
 ### ۴. آپلود تصویر روی Netlify
 

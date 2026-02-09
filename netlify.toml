@@ -7,6 +7,11 @@
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
 
+[functions]
+  directory = "netlify/functions"
+  [functions.server]
+    timeout = 26
+
 # Redirect API calls to the serverless function (keep path for Express)
 [[redirects]]
   force = true

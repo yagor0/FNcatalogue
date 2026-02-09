@@ -10,6 +10,7 @@ import { mkdirSync, existsSync } from 'fs';
 import multer from 'multer';
 import { initFirebase } from './firebase.js';
 import * as fs from './firestore.js';
+import { runSeed } from './initDb.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -41,6 +42,17 @@ app.use(express.json());
 function getSessionId(req) {
   return req.headers['x-session-id'] || req.body?.sessionId || 'guest';
 }
+
+// Wrapper so async route errors don't cause 502
+const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// ----- Health (no Firebase) - برای چک کردن اینکه تابع Netlify لود شده -----
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    env: !!process.env.FIREBASE_SERVICE_ACCOUNT_JSON ? 'firebase-set' : 'firebase-missing',
+  });
+});
 
 // ----- Categories -----
 app.get('/api/categories', async (req, res) => {
@@ -264,6 +276,40 @@ app.get('/api/admin/categories', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'خطای سرور' });
+  }
+});
+
+// ----- Seed Firestore (once): فقط با secret از env (GET یا POST) -----
+async function handleSeed(req, res) {
+  const secret = process.env.SEED_SECRET;
+  const given = req.query.secret || req.body?.secret;
+  if (!secret || given !== secret) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  try {
+    const result = await runSeed();
+    res.json(result);
+  } catch (err) {
+    console.error('Seed error:', err);
+    res.status(500).json({
+      error: 'خطای seed',
+      message: err.message || String(err),
+      hint: !process.env.FIREBASE_SERVICE_ACCOUNT_JSON ? 'FIREBASE_SERVICE_ACCOUNT_JSON در Netlify تنظیم شده؟' : undefined,
+    });
+  }
+}
+app.get('/api/admin/seed', handleSeed);
+app.post('/api/admin/seed', handleSeed);
+
+// Global error handler - جلوگیری از 502 وقتی خطا از دست رفته
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  if (!res.headersSent) {
+    res.status(500).json({
+      error: 'خطای سرور',
+      message: err.message || String(err),
+      hint: err.message && err.message.includes('FIREBASE') ? 'FIREBASE_SERVICE_ACCOUNT_JSON را در Netlify تنظیم کنید.' : undefined,
+    });
   }
 });
 

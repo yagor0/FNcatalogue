@@ -33,19 +33,17 @@ const products = [
   { name: 'بلوز زنانه', slug: 'womens-blouse', description: 'بلوز زنانه با طراحی شیک و پارچه نخی.', price: 279000, stock: 25, category_id: '3', brand: 'برند د', image: productImage, popularity: 110, attributes: { color: 'گلدار', size: 'S' } },
 ];
 
-async function main() {
+/** Run seed (categories, products, admin). Call from CLI or API. */
+export async function runSeed() {
   initFirebase();
   const firestore = getFirestore();
 
-  // Categories (use doc id = id)
   const catRef = firestore.collection(COLL.categories);
   for (const c of categories) {
     const { id, ...data } = c;
     await catRef.doc(id).set(data);
   }
-  console.log('Categories seeded.');
 
-  // Products (auto id)
   const prodRef = firestore.collection(COLL.products);
   for (const p of products) {
     await prodRef.add({
@@ -54,19 +52,24 @@ async function main() {
       updated_at: new Date(),
     });
   }
-  console.log('Products seeded.');
 
-  // Admin user (doc id = username or random)
   await firestore.collection(COLL.admin_users).doc('admin').set({
     username: 'admin',
     password_hash: 'admin123',
   });
-  console.log('Admin user seeded (admin / admin123).');
 
+  return { ok: true, message: 'دیتابیس با دسته‌ها، محصولات و کاربر admin ساخته شد.' };
+}
+
+async function main() {
+  await runSeed();
   console.log('Firestore initialized and seeded for FNcatalogue.');
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// فقط وقتی با node initDb.js اجرا شود؛ وقتی از سرور import می‌شود main را اجرا نکن (جلوی 502 را می‌گیرد)
+if (!process.env.NETLIFY) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
