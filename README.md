@@ -49,7 +49,7 @@ https://آدرس-سایت-شما.netlify.app/api/admin/seed?secret=fn123
 ## ساختار پروژه
 
 - **frontend/** — React (Vite). خروجی بیلد در `frontend/dist` روی Netlify سرو می‌شود.
-- **backend/** — Express API با Firebase Firestore. روی Netlify به‌صورت تابع در `netlify/functions/server.js` اجرا می‌شود.
+- **backend/** — Express API برای اجرای محلی. روی Netlify کل API داخل `netlify/functions/` (server.js + firebase.js + firestore.js + seed.js) است و بدون وابستگی به پوشهٔ backend اجرا می‌شود.
 - **netlify.toml** — تنظیمات بیلد، پوشهٔ publish، و redirect درخواست‌های `/api/*` به تابع. با ساخت `404.html` در بیلد، رفرش روی مسیرهایی مثل `/wishlist` و `/product/123` درست کار می‌کند.
 
 دیتابیس فقط **Firebase Firestore** است؛ SQLite یا فایل دیتابیس دیگری استفاده نمی‌شود.  
