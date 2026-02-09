@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "cd frontend && npm ci && npm run build"
+    "build": "cd frontend && npm install && npm run build"
   },
   "dependencies": {
     "cors": "^2.8.5",
