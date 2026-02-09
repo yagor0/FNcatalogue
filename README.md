@@ -11,7 +11,9 @@
 
 2. **متغیرهای محیطی** (Site configuration → Environment variables):
 
-   **روش الف — سه متغیر جدا (پیشنهادی برای Netlify):**
+   **مهم:** Lambda حداکثر ۴KB برای مجموع متغیرهای هر تابع دارد. **فقط یکی** از دو روش زیر را استفاده کنید (هر دو را با هم تنظیم نکنید):
+
+   **روش الف — سه متغیر جدا (پیشنهادی؛ کم‌حجم‌تر):**
 
    | Key | Value |
    |-----|--------|
@@ -21,7 +23,7 @@
    | `SEED_SECRET` | یک رمز مخفی برای seed یک‌بار (مثلاً `fn123`) |
 
    **روش ب — یک JSON:**  
-   به‌جای سه متغیر بالا می‌توانید فقط `FIREBASE_SERVICE_ACCOUNT_JSON` را با کل محتوای فایل JSON کلید سرویس پر کنید.
+   به‌جای سه متغیر بالا می‌توانید **فقط** `FIREBASE_SERVICE_ACCOUNT_JSON` را با کل محتوای فایل JSON کلید سرویس پر کنید (و سه متغیر بالا را حذف کنید).
 
 3. **Deploy**  
    Netlify با `netlify.toml` خودش فرانت را بیلد و API را به‌صورت تابع اجرا می‌کند.
@@ -52,8 +54,10 @@ https://آدرس-سایت-شما.netlify.app/api/admin/seed?secret=fn123
 - **backend/** — Express API برای اجرای محلی. روی Netlify کل API داخل `netlify/functions/` (server.js + firebase.js + firestore.js + seed.js) است و بدون وابستگی به پوشهٔ backend اجرا می‌شود.
 - **netlify.toml** — تنظیمات بیلد، پوشهٔ publish، و redirect درخواست‌های `/api/*` به تابع. با ساخت `404.html` در بیلد، رفرش روی مسیرهایی مثل `/wishlist` و `/product/123` درست کار می‌کند.
 
-دیتابیس فقط **Firebase Firestore** است؛ SQLite یا فایل دیتابیس دیگری استفاده نمی‌شود.  
-در پنل ادمین روی Netlify برای تصویر محصول از **URL تصویر** استفاده کنید (آپلود فایل روی سرور ذخیره نمی‌شود).
+دیتابیس **Firebase Firestore**؛ تصاویر محصولات در **Firebase Storage** ذخیره می‌شوند.
+
+**تصاویر محصول:** در پنل ادمین می‌توانید عکس آپلود کنید؛ عکس در Firebase Storage (پوشهٔ `products/`) ذخیره و لینک آن در محصول قرار می‌گیرد. در کنسول Firebase باید **Storage** را فعال کرده و قوانین را طوری تنظیم کنید که خواندن عمومی مجاز باشد، مثلاً:
+`allow read: if true; allow write: if request.auth != null;`
 
 ---
 

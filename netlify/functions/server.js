@@ -5,11 +5,24 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import serverless from 'serverless-http';
-import { initFirebase } from './firebase.js';
+import { initFirebase, getStorageBucket } from './firebase.js';
 import * as fs from './firestore.js';
 import { runSeed } from './seed.js';
 
 const upload = multer({ storage: multer.memoryStorage() });
+
+/** آپلود تصویر به Firebase Storage و برگرداندن URL عمومی */
+async function uploadProductImageToStorage(file) {
+  if (!file || !file.buffer) return null;
+  const bucket = await getStorageBucket();
+  const ext = (file.originalname && file.originalname.split('.').pop()) || 'jpg';
+  const name = `products/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+  const bucketFile = bucket.file(name);
+  await bucketFile.save(file.buffer, {
+    metadata: { contentType: file.mimetype || 'image/jpeg' },
+  });
+  return `https://storage.googleapis.com/${bucket.name}/${name}`;
+}
 const app = express();
 
 const origins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
@@ -174,7 +187,11 @@ app.get('/api/admin/products', requireAdmin, async (req, res) => {
 app.post('/api/admin/products', requireAdmin, upload.single('image'), async (req, res) => {
   try {
     const body = req.body || {};
-    const image = body.image || '';
+    let image = body.image || '';
+    if (req.file && req.file.buffer) {
+      const url = await uploadProductImageToStorage(req.file);
+      if (url) image = url;
+    }
     let attributes = body.attributes;
     if (typeof attributes === 'string') try { attributes = JSON.parse(attributes); } catch (_) {}
     const slug = (body.slug || body.name || 'product').replace(/\s+/g, '-') + '-' + Date.now();
@@ -203,7 +220,11 @@ app.put('/api/admin/products/:id', requireAdmin, upload.single('image'), async (
     const body = req.body || {};
     const current = await fs.getProductById(id);
     if (!current) return res.status(404).json({ error: 'Product not found' });
-    const image = body.image !== undefined ? body.image : current.image;
+    let image = body.image !== undefined ? body.image : current.image;
+    if (req.file && req.file.buffer) {
+      const url = await uploadProductImageToStorage(req.file);
+      if (url) image = url;
+    }
     let attributes = body.attributes;
     if (typeof attributes === 'string') try { attributes = JSON.parse(attributes); } catch (_) { attributes = current.attributes; }
     const data = {

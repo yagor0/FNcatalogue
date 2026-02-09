@@ -54,3 +54,9 @@ export async function getFirestore() {
   if (!a.apps.length) await initFirebase();
   return a.firestore();
 }
+
+export async function getStorageBucket() {
+  const a = await loadAdmin();
+  if (!a.apps.length) await initFirebase();
+  return a.storage().bucket();
+}

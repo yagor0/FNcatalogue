@@ -82,8 +82,14 @@ export async function getProductById(id) {
       p.category_slug = cat.data().slug;
     }
   }
-  const reviewsSnap = await (await db()).collection(COLL.reviews).where('product_id', '==', String(id)).orderBy('created_at', 'desc').get();
-  p.reviews = reviewsSnap.docs.map((d) => d.data());
+  const reviewsSnap = await (await db()).collection(COLL.reviews).where('product_id', '==', String(id)).get();
+  const reviewsList = reviewsSnap.docs.map((d) => d.data());
+  reviewsList.sort((a, b) => {
+    const ta = a.created_at?.toMillis?.() ?? a.created_at?.getTime?.() ?? 0;
+    const tb = b.created_at?.toMillis?.() ?? b.created_at?.getTime?.() ?? 0;
+    return tb - ta;
+  });
+  p.reviews = reviewsList;
   return p;
 }
 
@@ -93,8 +99,14 @@ export async function recordView(productId, sessionId) {
 }
 
 export async function getWishlist(sessionId) {
-  const snap = await (await db()).collection(COLL.wishlist).where('session_id', '==', sessionId).orderBy('created_at', 'desc').get();
-  const productIds = snap.docs.map((d) => d.data().product_id).filter(Boolean);
+  const snap = await (await db()).collection(COLL.wishlist).where('session_id', '==', sessionId).get();
+  const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id, _created: d.data().created_at })).filter((r) => r.product_id);
+  rows.sort((a, b) => {
+    const ta = a._created?.toMillis?.() ?? a._created?.getTime?.() ?? 0;
+    const tb = b._created?.toMillis?.() ?? b._created?.getTime?.() ?? 0;
+    return tb - ta;
+  });
+  const productIds = rows.map((r) => r.product_id);
   if (productIds.length === 0) return [];
   const productsSnap = await (await db()).collection(COLL.products).get();
   const byId = {};
@@ -107,37 +119,47 @@ export async function getWishlist(sessionId) {
 
 export async function addToWishlist(sessionId, productId) {
   const pid = String(productId);
-  const existing = await (await db()).collection(COLL.wishlist).where('session_id', '==', sessionId).where('product_id', '==', pid).limit(1).get();
-  if (!existing.empty) return { added: false, already: true };
+  const snap = await (await db()).collection(COLL.wishlist).where('session_id', '==', sessionId).get();
+  const already = snap.docs.some((d) => d.data().product_id === pid);
+  if (already) return { added: false, already: true };
   await (await db()).collection(COLL.wishlist).add({ session_id: sessionId, product_id: pid, created_at: FieldValue.serverTimestamp() });
   return { added: true };
 }
 
 export async function removeFromWishlist(sessionId, productId) {
-  const snap = await (await db()).collection(COLL.wishlist).where('session_id', '==', sessionId).where('product_id', '==', String(productId)).get();
+  const pid = String(productId);
+  const snap = await (await db()).collection(COLL.wishlist).where('session_id', '==', sessionId).get();
+  const toDelete = snap.docs.filter((d) => d.data().product_id === pid);
+  if (toDelete.length === 0) return true;
   const batch = (await db()).batch();
-  snap.docs.forEach((d) => batch.delete(d.ref));
+  toDelete.forEach((d) => batch.delete(d.ref));
   await batch.commit();
   return true;
 }
 
 export async function getHistory(sessionId, limit = 20) {
-  const snap = await (await db()).collection(COLL.view_history).where('session_id', '==', sessionId).orderBy('viewed_at', 'desc').limit(limit).get();
+  const snap = await (await db()).collection(COLL.view_history).where('session_id', '==', sessionId).get();
+  const rows = snap.docs.map((d) => ({ product_id: d.data().product_id, viewed_at: d.data().viewed_at })).filter((r) => r.product_id);
+  rows.sort((a, b) => {
+    const ta = a.viewed_at?.toMillis?.() ?? a.viewed_at?.getTime?.() ?? 0;
+    const tb = b.viewed_at?.toMillis?.() ?? b.viewed_at?.getTime?.() ?? 0;
+    return tb - ta;
+  });
   const seen = new Set();
   const productIds = [];
-  snap.docs.forEach((d) => {
-    const pid = d.data().product_id;
-    if (!seen.has(pid)) { seen.add(pid); productIds.push(pid); }
+  rows.forEach((r) => {
+    if (!seen.has(r.product_id)) { seen.add(r.product_id); productIds.push(r.product_id); }
   });
-  if (productIds.length === 0) return [];
+  const limited = productIds.slice(0, limit);
+  if (limited.length === 0) return [];
   const productsSnap = await (await db()).collection(COLL.products).get();
   const byId = {};
   productsSnap.docs.forEach((d) => { byId[d.id] = { id: d.id, ...d.data(), viewed_at: null }; });
-  snap.docs.forEach((d) => { const pid = d.data().product_id; if (byId[pid]) byId[pid].viewed_at = d.data().viewed_at; });
+  rows.forEach((r) => { if (byId[r.product_id]) byId[r.product_id].viewed_at = r.viewed_at; });
   const catSnap = await (await db()).collection(COLL.categories).get();
   const catsById = {};
   catSnap.docs.forEach((d) => { catsById[d.id] = d.data(); });
-  return productIds.map((pid) => productWithCategory(byId[pid] || { id: pid }, catsById[byId[pid]?.category_id])).filter((p) => p.name);
+  return limited.map((pid) => productWithCategory(byId[pid] || { id: pid }, catsById[byId[pid]?.category_id])).filter((p) => p.name);
 }
 
 export async function getRecommended(limit = 8) {

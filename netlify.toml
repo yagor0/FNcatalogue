@@ -6,6 +6,8 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
+# توجه: مجموع env vars ارسالی به توابع باید زیر 4KB (محدودیت Lambda) باشد.
+# فقط یکی از دو روش Firebase را در Netlify تنظیم کنید: سه متغیر یا FIREBASE_SERVICE_ACCOUNT_JSON.
 
 [functions]
   directory = "netlify/functions"
