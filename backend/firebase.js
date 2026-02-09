@@ -36,7 +36,17 @@ export function initFirebase() {
     admin.initializeApp({ projectId: PROJECT_ID });
     console.log('Using Firestore Emulator at', process.env.FIRESTORE_EMULATOR_HOST);
   } else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    let jsonStr = process.env.FIREBASE_SERVICE_ACCOUNT_JSON.trim();
+    if (jsonStr.startsWith('"') && jsonStr.endsWith('"')) jsonStr = jsonStr.slice(1, -1).replace(/\\"/g, '"');
+    let serviceAccount;
+    try {
+      serviceAccount = JSON.parse(jsonStr);
+    } catch (e) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON باید یک JSON معتبر باشد. ' + (e.message || ''));
+    }
+    if (!serviceAccount.client_email || !serviceAccount.private_key) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON باید فیلدهای client_email و private_key داشته باشد.');
+    }
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
