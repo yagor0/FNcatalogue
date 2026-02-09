@@ -180,6 +180,29 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+/** لینک آپلود مستقیم به Storage (بدون عبور فایل از تابع) — جلوگیری از timeout و ERR_CONNECTION_CLOSED */
+app.post('/api/admin/upload-url', requireAdmin, express.json(), async (req, res) => {
+  try {
+    const { filename, contentType } = req.body || {};
+    const ext = (filename && filename.split('.').pop()) || 'jpg';
+    const safeExt = /^[a-z0-9]+$/i.test(ext) ? ext : 'jpg';
+    const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${safeExt}`;
+    const bucket = await getStorageBucket();
+    const file = bucket.file(path);
+    const [uploadUrl] = await file.getSignedUrl({
+      version: 'v4',
+      action: 'write',
+      expires: Date.now() + 10 * 60 * 1000,
+      contentType: contentType || 'image/jpeg',
+    });
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${path}`;
+    res.json({ uploadUrl, publicUrl });
+  } catch (err) {
+    console.error('upload-url error:', err);
+    res.status(500).json({ error: 'خطا در ساخت لینک آپلود', message: safeErrMessage(err) });
+  }
+});
+
 app.get('/api/admin/products', requireAdmin, async (req, res) => {
   try {
     const rows = await fs.adminGetProducts();

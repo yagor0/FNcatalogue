@@ -126,6 +126,17 @@ export async function adminGetCategories() {
   return res.json();
 }
 
+/** لینک آپلود مستقیم به Firebase Storage — فایل از مرورگر مستقیم آپلود می‌شود، بدون عبور از سرور */
+export async function adminGetUploadUrl(filename, contentType = 'image/jpeg') {
+  const res = await fetch(API + '/admin/upload-url', {
+    method: 'POST',
+    headers: { ...adminHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename: filename || 'image.jpg', contentType }),
+  });
+  if (!res.ok) throw new Error('خطا در ساخت لینک آپلود');
+  return res.json();
+}
+
 export async function adminCreateProduct(formData) {
   const token = localStorage.getItem('admin_token');
   const res = await fetch(API + '/admin/products', {

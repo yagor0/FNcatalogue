@@ -38,12 +38,13 @@ export async function initFirebase() {
   if (a.apps.length) return a.app();
 
   if (USE_EMULATOR) {
-    a.initializeApp({ projectId: PROJECT_ID });
+    a.initializeApp({ projectId: PROJECT_ID, storageBucket: PROJECT_ID + '.appspot.com' });
   } else {
     const cert = getCert();
     if (!cert) throw new Error('در Netlify FIREBASE_SERVICE_ACCOUNT_JSON یا سه متغیر Firebase را تنظیم کنید.');
     a.initializeApp({
       credential: a.credential.cert(cert),
+      storageBucket: (cert.projectId || PROJECT_ID) + '.appspot.com',
     });
   }
   return a.app();

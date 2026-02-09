@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { adminGetProducts, adminGetCategories, adminCreateProduct, adminUpdateProduct, adminDeleteProduct } from '../api';
+import { adminGetProducts, adminGetCategories, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, adminGetUploadUrl } from '../api';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -10,6 +10,7 @@ export default function AdminDashboard() {
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', category_id: '', brand: '', image: '', attributes: '{}' });
   const [error, setError] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,6 +51,28 @@ export default function AdminDashboard() {
     });
   };
 
+  /** آپلود مستقیم به Firebase Storage با Signed URL — فایل از مرورگر می‌رود، بدون عبور از Netlify (جلوگیری از timeout) */
+  const handleImageSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError('');
+    setUploadingImage(true);
+    try {
+      const { uploadUrl, publicUrl } = await adminGetUploadUrl(file.name, file.type || 'image/jpeg');
+      const putRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type || 'image/jpeg' },
+      });
+      if (!putRes.ok) throw new Error('آپلود عکس ناموفق');
+      setForm((f) => ({ ...f, image: publicUrl, imageFile: null }));
+    } catch (err) {
+      setError(err.message || 'خطا در آپلود تصویر');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -61,8 +84,7 @@ export default function AdminDashboard() {
     fd.append('category_id', form.category_id);
     fd.append('brand', form.brand);
     fd.append('attributes', form.attributes);
-    if (form.imageFile) fd.append('image', form.imageFile);
-    else if (form.image) fd.append('image', form.image);
+    if (form.image) fd.append('image', form.image);
     try {
       if (editing) {
         await adminUpdateProduct(editing, fd);
@@ -127,9 +149,10 @@ export default function AdminDashboard() {
               <input value={form.brand} onChange={(e) => setForm(f => ({ ...f, brand: e.target.value }))} />
               <label>ویژگی‌ها (JSON)</label>
               <input value={form.attributes} onChange={(e) => setForm(f => ({ ...f, attributes: e.target.value }))} placeholder='{"رنگ":"قرمز","سایز":"M"}' />
-              <label>تصویر (فایل یا URL)</label>
-              <input type="file" accept="image/*" onChange={(e) => setForm(f => ({ ...f, imageFile: e.target.files?.[0] }))} />
-              {form.image && !form.imageFile && <input value={form.image} onChange={(e) => setForm(f => ({ ...f, image: e.target.value }))} placeholder="URL تصویر" />}
+              <label>تصویر (آپلود مستقیم به Firebase یا URL)</label>
+              <input type="file" accept="image/*" onChange={handleImageSelect} disabled={uploadingImage} />
+              {uploadingImage && <span style={{ marginRight: '0.5rem', color: 'var(--muted)' }}>در حال آپلود…</span>}
+              {form.image && <input value={form.image} onChange={(e) => setForm(f => ({ ...f, image: e.target.value }))} placeholder="URL تصویر" style={{ marginTop: '0.25rem', width: '100%' }} />}
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
                 <button type="submit" className="btn">ذخیره</button>
                 <button type="button" className="btn btn-ghost" onClick={() => { setEditing(null); setFormOpen(false); }}>انصراف</button>
