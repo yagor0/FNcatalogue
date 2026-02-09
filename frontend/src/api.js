@@ -126,28 +126,62 @@ export async function adminGetCategories() {
   return res.json();
 }
 
-/** تنظیم CORS باکت Storage (یک بار بعد از deploy اگر آپلود عکس خطای CORS می‌دهد) */
-export async function adminSetStorageCors() {
-  const res = await fetch(API + '/admin/set-storage-cors', {
+export async function adminCreateCategory(data) {
+  const res = await fetch(API + '/admin/categories', {
     method: 'POST',
-    headers: adminHeaders(),
+    headers: { ...adminHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
+  if (!res.ok) throw new Error('خطا در ایجاد دسته');
+  return res.json();
+}
+
+export async function adminUpdateCategory(id, data) {
+  const res = await fetch(API + '/admin/categories/' + id, {
+    method: 'PUT',
+    headers: { ...adminHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('خطا در بروزرسانی دسته');
+  return res.json();
+}
+
+export async function adminDeleteCategory(id) {
+  const res = await fetch(API + '/admin/categories/' + id, { method: 'DELETE', headers: adminHeaders() });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.message || data.error || 'خطا در تنظیم CORS');
+    throw new Error(data.error || 'خطا در حذف دسته');
   }
   return res.json();
 }
 
-/** لینک آپلود مستقیم به Firebase Storage — فایل از مرورگر مستقیم آپلود می‌شود، بدون عبور از سرور */
-export async function adminGetUploadUrl(filename, contentType = 'image/jpeg') {
-  const res = await fetch(API + '/admin/upload-url', {
+/** آپلود تصویر به ImgBB؛ برگرداندن URL مستقیم تصویر برای ذخیره در Firestore */
+export async function uploadImageToImgBB(file) {
+  const key = import.meta.env.VITE_IMGBB_KEY || 'bbc29d0bf7f2de21f0b6d24fee067b47';
+  if (!key) throw new Error('کلید ImgBB (VITE_IMGBB_KEY) تنظیم نشده است.');
+  const base64 = await fileToBase64(file);
+  const form = new URLSearchParams();
+  form.set('key', key);
+  form.set('image', base64);
+  const res = await fetch('https://api.imgbb.com/1/upload', {
     method: 'POST',
-    headers: { ...adminHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename: filename || 'image.jpg', contentType }),
+    body: form,
   });
-  if (!res.ok) throw new Error('خطا در ساخت لینک آپلود');
-  return res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!data.success || !data.data?.image?.url) throw new Error(data.error?.message || 'آپلود به ImgBB ناموفق');
+  return data.data.image.url;
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const s = reader.result;
+      resolve(s.indexOf(',') >= 0 ? s.split(',')[1] : s);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 export async function adminCreateProduct(formData) {

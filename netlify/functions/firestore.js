@@ -241,3 +241,39 @@ export async function adminDeleteProduct(id) {
   await batch.commit();
   return true;
 }
+
+// ----- Admin: Categories (parent_id برای زیردسته) -----
+export async function adminCreateCategory(data) {
+  const name = String(data.name || '').trim();
+  if (!name) return null;
+  const slug = data.slug ? String(data.slug).trim() : name.replace(/\s+/g, '-').replace(/[^\w\u0600-\u06FF\-]/g, '');
+  const parent_id = data.parent_id && String(data.parent_id).trim() ? String(data.parent_id).trim() : null;
+  const ref = await (await db()).collection(COLL.categories).add({ name, slug, parent_id });
+  const doc = await ref.get();
+  return { id: doc.id, ...doc.data() };
+}
+
+export async function adminUpdateCategory(id, data) {
+  const ref = (await db()).collection(COLL.categories).doc(String(id));
+  const doc = await ref.get();
+  if (!doc.exists) return null;
+  const updates = {};
+  if (data.name !== undefined) updates.name = String(data.name).trim();
+  if (data.slug !== undefined) updates.slug = String(data.slug).trim();
+  if (data.parent_id !== undefined) updates.parent_id = data.parent_id ? String(data.parent_id) : null;
+  if (Object.keys(updates).length === 0) return { id: ref.id, ...doc.data() };
+  await ref.update(updates);
+  const updated = await ref.get();
+  return { id: updated.id, ...updated.data() };
+}
+
+export async function adminDeleteCategory(id) {
+  const cid = String(id);
+  const ref = (await db()).collection(COLL.categories).doc(cid);
+  const doc = await ref.get();
+  if (!doc.exists) return { ok: false, reason: 'not_found' };
+  const productsSnap = await (await db()).collection(COLL.products).where('category_id', '==', cid).limit(1).get();
+  if (!productsSnap.empty) return { ok: false, reason: 'has_products' };
+  await ref.delete();
+  return { ok: true };
+}

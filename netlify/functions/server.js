@@ -5,7 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import serverless from 'serverless-http';
-import { initFirebase, getStorageBucket, setStorageBucketCors } from './firebase.js';
+import { initFirebase, getStorageBucket } from './firebase.js';
 import * as fs from './firestore.js';
 import { runSeed } from './seed.js';
 
@@ -180,29 +180,6 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-/** تنظیم CORS روی باکت Storage — یک بار بعد از deploy صدا بزنید تا آپلود از مرورگر کار کند */
-const STORAGE_CORS = [
-  {
-    origin: [
-      'https://fn-catalogue.netlify.app',
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-    ],
-    method: ['GET', 'POST', 'PUT', 'HEAD', 'OPTIONS'],
-    responseHeader: ['Content-Type', 'Content-Length', 'Content-Range', 'Authorization'],
-    maxAgeSeconds: 3600,
-  },
-];
-app.post('/api/admin/set-storage-cors', requireAdmin, async (req, res) => {
-  try {
-    await setStorageBucketCors(STORAGE_CORS);
-    res.json({ ok: true, message: 'CORS باکت Storage تنظیم شد. حالا آپلود تصویر را تست کنید.' });
-  } catch (err) {
-    console.error('set-storage-cors error:', err);
-    res.status(500).json({ error: 'خطا در تنظیم CORS', message: safeErrMessage(err) });
-  }
-});
-
 /** لینک آپلود مستقیم به Storage (بدون عبور فایل از تابع) — جلوگیری از timeout و ERR_CONNECTION_CLOSED */
 app.post('/api/admin/upload-url', requireAdmin, express.json(), async (req, res) => {
   try {
@@ -322,6 +299,42 @@ app.get('/api/admin/categories', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
+  }
+});
+
+app.post('/api/admin/categories', requireAdmin, express.json(), async (req, res) => {
+  try {
+    const { name, slug, parent_id } = req.body || {};
+    const row = await fs.adminCreateCategory({ name, slug, parent_id: parent_id || null });
+    if (!row) return res.status(400).json({ error: 'نام دسته لازم است' });
+    res.status(201).json(row);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'خطا در ایجاد دسته', message: safeErrMessage(err) });
+  }
+});
+
+app.put('/api/admin/categories/:id', requireAdmin, express.json(), async (req, res) => {
+  try {
+    const { name, slug, parent_id } = req.body || {};
+    const row = await fs.adminUpdateCategory(req.params.id, { name, slug, parent_id });
+    if (!row) return res.status(404).json({ error: 'دسته پیدا نشد' });
+    res.json(row);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'خطا در بروزرسانی دسته', message: safeErrMessage(err) });
+  }
+});
+
+app.delete('/api/admin/categories/:id', requireAdmin, async (req, res) => {
+  try {
+    const result = await fs.adminDeleteCategory(req.params.id);
+    if (result && result.ok) return res.json({ deleted: true });
+    if (result && result.reason === 'has_products') return res.status(400).json({ error: 'این دسته دارای محصول است؛ ابتدا محصولات را به دستهٔ دیگری منتقل کنید.' });
+    return res.status(404).json({ error: 'دسته پیدا نشد' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'خطا در حذف دسته', message: safeErrMessage(err) });
   }
 });
 

@@ -54,24 +54,9 @@ https://fn-catalogue.netlify.app/api/admin/seed?secret=fn123
 - **backend/** — Express API برای اجرای محلی. روی Netlify کل API داخل `netlify/functions/` (server.js + firebase.js + firestore.js + seed.js) است و بدون وابستگی به پوشهٔ backend اجرا می‌شود.
 - **netlify.toml** — تنظیمات بیلد، پوشهٔ publish، و redirect درخواست‌های `/api/*` به تابع. با ساخت `404.html` در بیلد، رفرش روی مسیرهایی مثل `/wishlist` و `/product/123` درست کار می‌کند.
 
-دیتابیس **Firebase Firestore**؛ تصاویر محصولات در **Firebase Storage** ذخیره می‌شوند.
+دیتابیس **Firebase Firestore**؛ آدرس تصاویر محصولات (URL) در Firestore ذخیره می‌شود و خود تصاویر روی **ImgBB** آپلود می‌شوند.
 
-**تصاویر محصول:** آپلود از پنل ادمین با **Firebase SDK** (فرانت) انجام می‌شود؛ عکس در Storage (پوشهٔ `products/`) ذخیره و لینک آن با ذخیرهٔ محصول در Firestore ثبت می‌شود. در کنسول Firebase **Storage** را فعال کنید. چون آپلود از فرانت بدون Firebase Auth انجام می‌شود، برای مسیر `products` باید نوشتن مجاز باشد، مثلاً:
-`match /products/{all} { allow read, write: if true; }`
-(برای محیط واقعی بعداً می‌توانید با Firebase Auth محدود کنید.)
-
-**تنظیم Firebase در فرانت (برای آپلود تصویر):** در Firebase Console → Project settings → Your apps یک اپ وب اضافه کنید و مقادیر را در Netlify به‌صورت متغیر محیطی برای **Build** قرار دهید (با پیشوند `VITE_` تا در فرانت در دسترس باشند):
-
-| Key | Value |
-|-----|--------|
-| `VITE_FIREBASE_API_KEY` | apiKey از Firebase Console |
-| `VITE_FIREBASE_AUTH_DOMAIN` | مثلاً `fncatalogue.firebaseapp.com` |
-| `VITE_FIREBASE_PROJECT_ID` | مثلاً `fncatalogue` |
-| `VITE_FIREBASE_STORAGE_BUCKET` | مثلاً `fncatalogue.appspot.com` یا `fncatalogue.firebasestorage.app` |
-
-**CORS برای آپلود:** اگر باکت شما `fncatalogue.firebasestorage.app` است، در Netlify متغیر **`FIREBASE_STORAGE_BUCKET`** را روی همین مقدار تنظیم کنید (برای توابع سرور). بعد از deploy، در پنل مدیریت (داشبورد) دکمهٔ **«تنظیم CORS آپلود»** را یک بار بزنید تا CORS باکت از طریق API تنظیم شود. اگر خطای دسترسی داد، از روش دستی با [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) استفاده کنید:  
-`gcloud auth application-default login` و سپس  
-`gsutil cors set storage-cors.json gs://fncatalogue.firebasestorage.app`
+**تصاویر محصول:** در پنل ادمین با انتخاب عکس، تصویر مستقیم به [ImgBB](https://api.imgbb.com/) آپلود می‌شود و فقط **URL** تصویر در Firestore ذخیره می‌گردد. کلید پیش‌فرض ImgBB در کد وجود دارد؛ در صورت تمایل می‌توانید در Netlify متغیر **`VITE_IMGBB_KEY`** را با کلید API خود از [ImgBB](https://api.imgbb.com/) تنظیم کنید.
 
 ---
 
