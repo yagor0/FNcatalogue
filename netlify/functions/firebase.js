@@ -34,7 +34,15 @@ export async function initFirebase() {
     if (!serviceAccount.client_email || !serviceAccount.private_key) {
       throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON باید client_email و private_key داشته باشد.');
     }
-    a.initializeApp({ credential: a.credential.cert(serviceAccount) });
+    // کلید خصوصی در env اغلب با \n متنی ذخیره می‌شود؛ باید به خط جدید واقعی تبدیل شود
+    const privateKey = String(serviceAccount.private_key).replace(/\\n/g, '\n');
+    a.initializeApp({
+      credential: a.credential.cert({
+        projectId: serviceAccount.project_id,
+        clientEmail: serviceAccount.client_email,
+        privateKey,
+      }),
+    });
   } else {
     throw new Error('در Netlify متغیر FIREBASE_SERVICE_ACCOUNT_JSON (یا سه متغیر Firebase) را تنظیم کنید.');
   }
