@@ -17,22 +17,33 @@ const headers = () => ({
   'X-Session-Id': getSessionId(),
 });
 
+async function throwIfNotOk(res, defaultMsg) {
+  if (res.ok) return;
+  let msg = defaultMsg;
+  try {
+    const data = await res.json();
+    if (data.message) msg = data.message;
+    else if (data.error) msg = data.error;
+  } catch (_) {}
+  throw new Error(msg);
+}
+
 export async function getCategories(tree = false) {
   const res = await fetch(API + '/categories' + (tree ? '?tree=1' : ''));
-  if (!res.ok) throw new Error('خطا در بارگذاری دسته‌ها');
+  await throwIfNotOk(res, 'خطا در بارگذاری دسته‌ها');
   return res.json();
 }
 
 export async function getProducts(params = {}) {
   const u = new URLSearchParams(params);
   const res = await fetch(API + '/products?' + u);
-  if (!res.ok) throw new Error('خطا در بارگذاری محصولات');
+  await throwIfNotOk(res, 'خطا در بارگذاری محصولات');
   return res.json();
 }
 
 export async function getProduct(id) {
   const res = await fetch(API + '/products/' + id);
-  if (!res.ok) throw new Error('خطا در بارگذاری محصول');
+  await throwIfNotOk(res, 'خطا در بارگذاری محصول');
   return res.json();
 }
 
@@ -46,7 +57,7 @@ export async function recordView(productId) {
 
 export async function getWishlist() {
   const res = await fetch(API + '/wishlist', { headers: headers() });
-  if (!res.ok) throw new Error('خطا در بارگذاری لیست علاقه‌مندی');
+  await throwIfNotOk(res, 'خطا در بارگذاری لیست علاقه‌مندی');
   return res.json();
 }
 
@@ -68,13 +79,13 @@ export async function removeFromWishlist(productId) {
 
 export async function getHistory() {
   const res = await fetch(API + '/history', { headers: headers() });
-  if (!res.ok) throw new Error('خطا در بارگذاری تاریخچه');
+  await throwIfNotOk(res, 'خطا در بارگذاری تاریخچه');
   return res.json();
 }
 
 export async function getRecommended(limit = 8) {
   const res = await fetch(API + '/recommended?limit=' + limit);
-  if (!res.ok) throw new Error('خطا در بارگذاری پیشنهادها');
+  await throwIfNotOk(res, 'خطا در بارگذاری پیشنهادها');
   return res.json();
 }
 

@@ -43,6 +43,11 @@ function getSessionId(req) {
   return req.headers['x-session-id'] || req.body?.sessionId || 'guest';
 }
 
+function safeErrMessage(err) {
+  const msg = (err && (err.message || String(err))) || '';
+  return msg.slice(0, 300).replace(/[^\w\u0600-\u06FF\s\-:.]/g, ' ');
+}
+
 // Wrapper so async route errors don't cause 502
 const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -66,7 +71,7 @@ app.get('/api/categories', async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -78,7 +83,7 @@ app.get('/api/products', async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -89,7 +94,7 @@ app.get('/api/products/:id', async (req, res) => {
     res.json(row);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -100,7 +105,7 @@ app.post('/api/products/:id/view', async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -112,7 +117,7 @@ app.get('/api/wishlist', async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -123,7 +128,7 @@ app.post('/api/wishlist/:productId', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -134,7 +139,7 @@ app.delete('/api/wishlist/:productId', async (req, res) => {
     res.json({ removed: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -146,7 +151,7 @@ app.get('/api/history', async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -158,7 +163,7 @@ app.get('/api/recommended', async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -170,7 +175,7 @@ app.post('/api/products/:id/reviews', async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -201,7 +206,7 @@ app.get('/api/admin/products', requireAdmin, async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
@@ -275,7 +280,7 @@ app.get('/api/admin/categories', requireAdmin, async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'خطای سرور' });
+    res.status(500).json({ error: 'خطای سرور', message: safeErrMessage(err) });
   }
 });
 
