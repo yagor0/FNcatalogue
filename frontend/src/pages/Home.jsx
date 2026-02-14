@@ -87,8 +87,6 @@ export default function Home() {
 
       <div className="catalog-layout">
         <aside className="sidebar">
-          <h3>دسته‌بندی</h3>
-          {renderCategoryTree(categories)}
           <h3>فیلتر برند</h3>
           <input
             type="text"
@@ -111,6 +109,8 @@ export default function Home() {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
           />
+          <h3>دسته‌بندی</h3>
+          {renderCategoryTree(categories)}
         </aside>
 
         <section className="products-section">

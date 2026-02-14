@@ -56,6 +56,12 @@ input, select, textarea {
   padding: 0 1rem;
 }
 
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+}
+
 /* Layout */
 .app-layout {
   display: flex;
@@ -104,9 +110,17 @@ input, select, textarea {
 
 .search-form {
   flex: 1;
+  min-width: 0;
   max-width: 400px;
   display: flex;
   gap: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .search-form {
+    max-width: none;
+    width: 100%;
+  }
 }
 
 .search-form input {
@@ -159,13 +173,15 @@ input, select, textarea {
 /* Sidebar filters */
 .catalog-layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 260px 1fr;
   gap: 1.5rem;
+  align-items: start;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 992px) {
   .catalog-layout {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 
@@ -173,9 +189,7 @@ input, select, textarea {
   background: var(--surface);
   border-radius: var(--radius);
   padding: 1.25rem;
-  height: fit-content;
-  position: sticky;
-  top: 80px;
+  /* بدون sticky تا با اسکرول صفحه حرکت کند و همهٔ فیلترها دیده شوند */
 }
 
 .sidebar h3 {
@@ -238,8 +252,21 @@ input, select, textarea {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .product-card {
@@ -455,6 +482,13 @@ input, select, textarea {
   font-size: 1.1rem;
   margin: 2rem 0 1rem;
   color: var(--text);
+}
+
+@media (max-width: 600px) {
+  .section-title {
+    margin: 1.5rem 0 0.75rem;
+    font-size: 1rem;
+  }
 }
 
 /* Admin */

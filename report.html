@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>گزارش پروژه — کاتالوگ الکترونیک FNcatalogue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-soft: rgba(88, 166, 255, 0.15);
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      margin: 0;
+      padding: 0;
+      font-size: 15px;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+    }
+    h3 { font-size: 1.05rem; font-weight: 600; margin: 1.5rem 0 0.6rem; color: var(--text); }
+    p { margin: 0 0 0.75rem; color: var(--muted); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card h3 { margin-top: 0; }
+    ul, ol { margin: 0.5rem 0 1rem; padding-right: 1.5rem; color: var(--muted); }
+    li { margin-bottom: 0.35rem; }
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .toc h2 { margin-top: 0; border: none; }
+    .toc a {
+      color: var(--accent);
+      text-decoration: none;
+      display: block;
+      padding: 0.35rem 0;
+      font-size: 0.95rem;
+    }
+    .toc a:hover { text-decoration: underline; }
+    .tree {
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .tree .dir { color: var(--accent); }
+    .tree .file { color: var(--green); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      text-align: right;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+    }
+    th { background: var(--surface); color: var(--accent); font-weight: 600; }
+    td { color: var(--muted); }
+    code {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .badge--front { background: rgba(63, 185, 80, 0.2); color: var(--green); }
+    .badge--back { background: rgba(210, 153, 34, 0.2); color: var(--orange); }
+    .badge--db { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+    .badge--infra { background: rgba(248, 81, 73, 0.15); color: #f85149; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    .section-num { color: var(--muted); font-weight: 400; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>گزارش پروژه — کاتالوگ الکترونیک FNcatalogue</h1>
+    <p class="subtitle">توضیح ریزبخش‌های پروژه برای گزارش نهایی</p>
+
+    <nav class="toc">
+      <h2>فهرست</h2>
+      <a href="#overview">۱. نمای کلی و هدف پروژه</a>
+      <a href="#stack">۲. فناوری‌ها</a>
+      <a href="#structure">۳. ساختار پوشه‌ها و فایل‌ها</a>
+      <a href="#frontend">۴. بخش فرانت‌اند (React)</a>
+      <a href="#api">۵. بخش API و توابع Netlify</a>
+      <a href="#database">۶. دیتابیس و ذخیره‌سازی</a>
+      <a href="#deploy">۷. استقرار و محیط (Netlify)</a>
+      <a href="#features">۸. خلاصهٔ قابلیت‌ها</a>
+    </nav>
+
+    <section id="overview">
+      <h2><span class="section-num">۱. </span>نمای کلی و هدف پروژه</h2>
+      <div class="card">
+        <p>
+          پروژه <strong>FNcatalogue</strong> یک <strong>کاتالوگ الکترونیک</strong> است که به کاربران امکان می‌دهد محصولات را بر اساس دسته‌بندی و فیلترها ببینند، به لیست علاقه‌مندی و تاریخچهٔ بازدید دسترسی داشته باشند، و ادمین بتواند محصولات و دسته‌بندی‌ها را مدیریت کند. فرانت در مرورگر اجرا می‌شود، داده‌ها در <strong>Firebase Firestore</strong> ذخیره می‌شوند، و سرویس‌ها روی <strong>Netlify</strong> میزبانی می‌شوند.
+        </p>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2><span class="section-num">۲. </span>فناوری‌ها</h2>
+      <div class="card">
+        <h3>فرانت‌اند</h3>
+        <p><span class="badge badge--front">React</span> با <span class="badge badge--front">Vite</span>؛ مسیریابی با <span class="badge badge--front">React Router</span>. استایل‌ها با CSS (متغیرها و کلاس‌های سفارشی).</p>
+      </div>
+      <div class="card">
+        <h3>بک‌اند و API</h3>
+        <p><span class="badge badge--back">Node.js</span> و <span class="badge badge--back">Express</span>؛ روی Netlify به‌صورت <span class="badge badge--back">Netlify Functions</span> (serverless) اجرا می‌شود.</p>
+      </div>
+      <div class="card">
+        <h3>دیتابیس و ذخیره‌سازی</h3>
+        <p><span class="badge badge--db">Firebase Firestore</span> برای محصولات، دسته‌ها، لیست علاقه‌مندی، تاریخچه و ادمین. آدرس تصاویر در Firestore؛ خود تصاویر روی <span class="badge badge--db">ImgBB</span> آپلود می‌شوند.</p>
+      </div>
+      <div class="card">
+        <h3>استقرار</h3>
+        <p><span class="badge badge--infra">Netlify</span> برای هاست فرانت (SPA) و توابع سرور؛ دامنهٔ نمونه: <code>fn-catalogue.netlify.app</code>.</p>
+      </div>
+    </section>
+
+    <section id="structure">
+      <h2><span class="section-num">۳. </span>ساختار پوشه‌ها و فایل‌ها</h2>
+      <div class="card">
+        <h3>ساختار درخت پروژه</h3>
+        <pre class="tree">Fanavari project/
+├── frontend/                 # اپلیکیشن React
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── package.json
+│   └── src/
+│       ├── main.jsx         # نقطهٔ ورود و Router
+│       ├── App.jsx          # لایهٔ اصلی اپ
+│       ├── index.css        # استایل‌های سراسری
+│       ├── api.js           # فراخوانی‌های API به سرور
+│       ├── components/
+│       │   └── ProductCard.jsx
+│       └── pages/
+│           ├── Home.jsx
+│           ├── ProductDetail.jsx
+│           ├── Wishlist.jsx
+│           ├── History.jsx
+│           ├── AdminLogin.jsx
+│           └── AdminDashboard.jsx
+├── netlify/
+│   └── functions/          # توابع سرور (API)
+│       ├── server.js        # Express و روت‌های API
+│       ├── firebase.js     # اتصال Firebase Admin
+│       ├── firestore.js    # عملیات Firestore
+│       └── seed.js         # دادهٔ اولیه
+├── backend/                # فقط برای اجرای محلی
+│   ├── server.js
+│   ├── firebase.js
+│   ├── firestore.js
+│   └── initDb.js
+├── netlify.toml            # تنظیمات بیلد و redirect
+├── package.json            # وابستگی‌های ریشه (برای توابع)
+└── report.html             # این گزارش</pre>
+      </div>
+    </section>
+
+    <section id="frontend">
+      <h2><span class="section-num">۴. </span>بخش فرانت‌اند (React)</h2>
+      <div class="card">
+        <h3>ورود و مسیریابی</h3>
+        <p><code>main.jsx</code> اپ را رندر و <code>React Router</code> را راه‌اندازی می‌کند. مسیرها: <code>/</code> (خانه)، <code>/product/:id</code>، <code>/wishlist</code>، <code>/history</code>، <code>/admin</code> (ورود)، <code>/admin/dashboard</code> (پنل مدیریت).</p>
+      </div>
+      <div class="card">
+        <h3>صفحات (pages)</h3>
+        <table>
+          <thead><tr><th>فایل</th><th>مسیر</th><th>توضیح</th></tr></thead>
+          <tbody>
+            <tr><td>Home.jsx</td><td>/</td><td>صفحهٔ اصلی؛ دسته‌ها، محصولات، پیشنهادها و جستجو/فیلتر</td></tr>
+            <tr><td>ProductDetail.jsx</td><td>/product/:id</td><td>جزئیات محصول، نظرات، افزودن به علاقه‌مندی و ثبت بازدید</td></tr>
+            <tr><td>Wishlist.jsx</td><td>/wishlist</td><td>لیست علاقه‌مندی‌ها بر اساس session</td></tr>
+            <tr><td>History.jsx</td><td>/history</td><td>تاریخچهٔ بازدید محصولات</td></tr>
+            <tr><td>AdminLogin.jsx</td><td>/admin</td><td>ورود ادمین (نام کاربری / رمز)</td></tr>
+            <tr><td>AdminDashboard.jsx</td><td>/admin/dashboard</td><td>مدیریت محصولات و دسته‌بندی‌ها؛ افزودن/ویرایش/حذف؛ آپلود تصویر به ImgBB؛ ویژگی‌ها به‌صورت فیلدهای جدا؛ دسته و زیردسته</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>کامپوننت و API کلاینت</h3>
+        <p><strong>ProductCard.jsx</strong>: کارت نمایش محصول در لیست با لینک به صفحهٔ جزئیات و دکمهٔ علاقه‌مندی.</p>
+        <p><strong>api.js</strong>: توابع <code>fetch</code> برای تمام endpointهای API (دسته‌ها، محصولات، wishlist، history، recommended، نظرات، ورود ادمین، CRUD محصول و دسته، آپلود ImgBB). شناسهٔ session در <code>localStorage</code> برای wishlist و history نگه داشته می‌شود.</p>
+      </div>
+    </section>
+
+    <section id="api">
+      <h2><span class="section-num">۵. </span>بخش API و توابع Netlify</h2>
+      <div class="card">
+        <h3>تابع اصلی: server.js</h3>
+        <p>یک اپ Express با <code>serverless-http</code> wrap شده و به‌صورت تابع Netlify export می‌شود. تمام درخواست‌های <code>/api/*</code> به این تابع redirect می‌شوند.</p>
+        <p><strong>روت‌های عمومی:</strong> <code>GET /api/health</code>، <code>GET /api/categories</code> (با <code>?tree=1</code> برای درخت)، <code>GET/POST /api/products</code>، <code>GET /api/products/:id</code>، <code>POST /api/products/:id/view</code>، <code>GET/POST/DELETE /api/wishlist</code>، <code>GET /api/history</code>، <code>GET /api/recommended</code>، <code>POST /api/products/:id/reviews</code>.</p>
+        <p><strong>روت‌های ادمین (با Bearer token):</strong> <code>POST /api/admin/login</code>، <code>GET/POST/PUT/DELETE /api/admin/products</code>، <code>GET/POST/PUT/DELETE /api/admin/categories</code>، <code>POST /api/admin/upload-url</code> (Signed URL برای آپلود به Storage؛ اختیاری)، و <code>GET|POST /api/admin/seed</code> (با <code>SEED_SECRET</code>).</p>
+      </div>
+      <div class="card">
+        <h3>firebase.js</h3>
+        <p>اتصال Firebase Admin با کلید سرویس از متغیرهای محیطی (<code>FIREBASE_PROJECT_ID</code>, <code>FIREBASE_CLIENT_EMAIL</code>, <code>FIREBASE_PRIVATE_KEY</code> یا <code>FIREBASE_SERVICE_ACCOUNT_JSON</code>). لود تنبل ماژول <code>firebase-admin</code> برای جلوگیری از خطا در cold start. توابع <code>initFirebase</code>، <code>getFirestore</code>، <code>getStorageBucket</code> (برای Signed URL در صورت استفاده).</p>
+      </div>
+      <div class="card">
+        <h3>firestore.js</h3>
+        <p>لایهٔ دسترسی به داده: دسته‌ها (flat و tree)، محصولات (لیست، جزئیات، پیشنهاد، افزایش بازدید)، wishlist، view_history، نظرات، ادمین (ورود، CRUD محصول و دسته). همهٔ کوئری‌ها بدون وابستگی به ایندکس مرکب Firestore طراحی شده‌اند (مرتب‌سازی و فیلتر در حافظه در صورت نیاز).</p>
+      </div>
+      <div class="card">
+        <h3>seed.js</h3>
+        <p>ایجاد دادهٔ اولیه در Firestore (دسته‌ها، چند محصول نمونه، کاربر ادمین)؛ فقط از طریق روت <code>/api/admin/seed</code> با پارامتر <code>secret</code> فراخوانی می‌شود.</p>
+      </div>
+    </section>
+
+    <section id="database">
+      <h2><span class="section-num">۶. </span>دیتابیس و ذخیره‌سازی</h2>
+      <div class="card">
+        <h3>کالکشن‌های Firestore</h3>
+        <table>
+          <thead><tr><th>کالکشن</th><th>کاربرد</th></tr></thead>
+          <tbody>
+            <tr><td>categories</td><td>دسته‌بندی‌ها با فیلد <code>parent_id</code> برای زیردسته</td></tr>
+            <tr><td>products</td><td>محصولات با نام، قیمت، دسته، برند، تصویر (URL)، ویژگی‌ها، popularity</td></tr>
+            <tr><td>wishlist</td><td>رابطهٔ session_id و product_id</td></tr>
+            <tr><td>view_history</td><td>ثبت بازدید محصول به ازای session</td></tr>
+            <tr><td>reviews</td><td>نظرات هر محصول</td></tr>
+            <tr><td>admin_users</td><td>کاربران ادمین برای ورود</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>تصاویر</h3>
+        <p>تصویر محصول به‌صورت <strong>URL</strong> در فیلد <code>image</code> ذخیره می‌شود. آپلود از پنل ادمین با ارسال مستقیم به <strong>ImgBB API</strong> از مرورگر انجام می‌شود و فقط URL برگشتی در Firestore قرار می‌گیرد (بدون عبور فایل از Netlify و بدون timeout).</p>
+      </div>
+    </section>
+
+    <section id="deploy">
+      <h2><span class="section-num">۷. </span>استقرار و محیط (Netlify)</h2>
+      <div class="card">
+        <h3>فایل netlify.toml</h3>
+        <p><strong>build:</strong> دستور <code>npm run build</code>، خروجی <code>frontend/dist</code> برای publish، پوشهٔ توابع <code>netlify/functions</code>. <strong>redirectها:</strong> <code>/api/*</code> به <code>/.netlify/functions/server</code>؛ مسیرهای SPA مانند <code>/admin</code>، <code>/admin/*</code>، <code>/wishlist</code>، <code>/history</code>، <code>/product/*</code> به <code>/index.html</code> تا رفرش و لینک مستقیم درست کار کنند.</p>
+      </div>
+      <div class="card">
+        <h3>متغیرهای محیطی</h3>
+        <p>برای Firebase یکی از دو روش: سه متغیر <code>FIREBASE_PROJECT_ID</code>, <code>FIREBASE_CLIENT_EMAIL</code>, <code>FIREBASE_PRIVATE_KEY</code> یا یک متغیر <code>FIREBASE_SERVICE_ACCOUNT_JSON</code> (مجموع envها زیر ۴KB برای Lambda). <code>SEED_SECRET</code> برای اجرای یک‌بار seed. اختیاری: <code>VITE_IMGBB_KEY</code> برای کلید ImgBB در بیلد فرانت.</p>
+      </div>
+    </section>
+
+    <section id="features">
+      <h2><span class="section-num">۸. </span>خلاصهٔ قابلیت‌ها</h2>
+      <div class="card">
+        <ul>
+          <li>نمایش دسته‌بندی به‌صورت درختی و فیلتر محصولات بر اساس دسته، برند، قیمت، جستجو و مرتب‌سازی.</li>
+          <li>صفحهٔ جزئیات محصول با نظرات و ثبت بازدید و افزودن به علاقه‌مندی.</li>
+          <li>لیست علاقه‌مندی و تاریخچهٔ بازدید بر اساس session (بدون نیاز به ثبت‌نام).</li>
+          <li>پنل ادمین: ورود با نام کاربری/رمز، مدیریت محصولات (ایجاد، ویرایش، حذف) با فیلدهای جدا برای ویژگی‌ها و انتخاب دسته/زیردسته؛ مدیریت دسته‌بندی‌ها (دستهٔ اصلی و زیردسته، ایجاد/ویرایش/حذف با جلوگیری از حذف دستهٔ دارای محصول).</li>
+          <li>آپلود تصویر محصول از طریق ImgBB و ذخیرهٔ فقط URL در Firestore.</li>
+          <li>استقرار کامل روی Netlify با Firestore و بدون نیاز به سرور جدا.</li>
+        </ul>
+      </div>
+    </section>
+
+    <hr />
+    <p class="subtitle" style="margin-top: 2rem;">پایان گزارش — پروژهٔ کاتالوگ الکترونیک FNcatalogue</p>
+  </div>
+</body>
+</html>
