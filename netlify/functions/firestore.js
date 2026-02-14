@@ -45,6 +45,23 @@ export async function getCategoriesTree() {
   return root;
 }
 
+/** شناسهٔ یک دسته + همهٔ زیردسته‌ها (برای فیلتر سلسله‌مراتبی) */
+function categoryIdsWithChildren(categoryId, flatCategories) {
+  const id = String(categoryId);
+  const set = new Set([id]);
+  let added = true;
+  while (added) {
+    added = false;
+    flatCategories.forEach((c) => {
+      if (c.parent_id && set.has(String(c.parent_id)) && !set.has(c.id)) {
+        set.add(c.id);
+        added = true;
+      }
+    });
+  }
+  return set;
+}
+
 export async function getProducts(filters = {}) {
   const { q, category, brand, minPrice, maxPrice, sort = 'newest', order = 'desc' } = filters;
   const snap = await (await db()).collection(COLL.products).get();
@@ -53,7 +70,11 @@ export async function getProducts(filters = {}) {
     const lower = q.toLowerCase();
     list = list.filter((p) => (p.name && p.name.toLowerCase().includes(lower)) || (p.description && p.description.toLowerCase().includes(lower)));
   }
-  if (category) list = list.filter((p) => p.category_id === String(category) || p.category_id === category);
+  if (category) {
+    const flat = await getCategoriesFlat();
+    const allowedIds = categoryIdsWithChildren(category, flat);
+    list = list.filter((p) => allowedIds.has(String(p.category_id)));
+  }
   if (brand) list = list.filter((p) => p.brand && p.brand.toLowerCase().includes(String(brand).toLowerCase()));
   if (minPrice != null && minPrice !== '') list = list.filter((p) => p.price >= Number(minPrice));
   if (maxPrice != null && maxPrice !== '') list = list.filter((p) => p.price <= Number(maxPrice));
